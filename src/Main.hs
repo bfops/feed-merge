@@ -9,6 +9,7 @@ import Data.Time.Format (parseTimeM)
 import Data.Time.Clock
 import Network.Curl
 import System.Environment
+import System.IO
 import Text.Feed.Constructor
 import Text.Feed.Export
 import Text.Feed.Import
@@ -29,11 +30,11 @@ fetch_url url = do
 
 get_feed :: String -> IO [(Feed, Item)]
 get_feed url = do
-  putStrLn ("Getting " ++ url)
+  hPutStrLn stderr ("Getting " ++ url)
   feed <- fetch_url url
   case parseFeedString feed of
     Nothing -> do
-      putStrLn ("Error parsing " ++ url)
+      hPutStrLn stderr ("Error parsing " ++ url)
       return []
     Just feed -> do
       return ((feed,) <$> feedItems feed)
@@ -58,13 +59,13 @@ merge feeds = do
     last_update ((_feed, item), _rest) = do
       case getItemPublishDateString item of
         Nothing -> do
-          putStrLn ("Could not find time for " ++ show item)
+          hPutStrLn stderr ("Could not find time for " ++ show item)
           return Nothing
         Just as_str -> do
           case parse_published_time as_str of
             Just x -> return (Just x)
             Nothing -> do
-              putStrLn ("Could not parse publish time " ++ as_str)
+              hPutStrLn stderr ("Could not parse publish time " ++ as_str)
               return Nothing
 
     parse_published_time :: String -> Maybe UTCTime
@@ -81,7 +82,7 @@ merged_feed_items :: String -> IO [(Feed, Item)]
 merged_feed_items feeds_file = do
   feeds <- feeds feeds_file
   feeds <- mapM get_feed feeds
-  putStrLn "Finished fetching"
+  hPutStrLn stderr "Finished fetching"
   merged <- merge feeds
   return merged
 
@@ -132,5 +133,5 @@ main = do
       putStrLn (show (xmlFeed feed))
       return ()
     _ -> do
-      putStrLn "Unexpected arguments"
+      hPutStrLn stderr "Unexpected arguments"
       return ()
