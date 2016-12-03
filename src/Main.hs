@@ -15,6 +15,7 @@ import Text.Feed.Export
 import Text.Feed.Import
 import Text.Feed.Query
 import Text.Feed.Types
+import Text.XML.Light.Output
 
 infixl 1 |>
 (|>) :: a -> (a -> b) -> b
@@ -130,7 +131,7 @@ main = do
   case args of
     [feeds_file] -> do
       feed <- merged_feed feeds_file
-      putStrLn (show (xmlFeed feed))
+      putStrLn (ppElement (xmlFeed feed))
       return ()
     _ -> do
       hPutStrLn stderr "Unexpected arguments"

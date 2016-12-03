@@ -19,6 +19,7 @@ executable rss-refeeder
                     , feed
                     , time
                     , time-locale-compat
+                    , xml
 
 source-repository head
   type: git
