@@ -1,16 +1,16 @@
-name:               rss-repackage
+name:               rss-refeeder
 version:            0.0.0
 synopsis:           Combine RSS feeds into a more easily-digestible feed.
 description:        Combine RSS feeds into a more easily-digestible feed.
 category:           Network
 license:            BSD3
 author:             Zeke Foppa
-homepage:           https://github.com/bfops/rss-repackage
+homepage:           https://github.com/bfops/rss-refeeder
 maintainer:         benjamin.foppa@gmail.com
 build-type:         Simple
 cabal-version:      >= 1.9.2
 
-executable rss-repackage
+executable rss-refeeder
     hs-source-dirs:   src
     ghc-options:      -Wall -Werror -fno-warn-name-shadowing
     main-is:          Main.hs
@@ -22,4 +22,4 @@ executable rss-repackage
 
 source-repository head
   type: git
-  location: https://github.com/bfops/rss-repackage
+  location: https://github.com/bfops/rss-refeeder
