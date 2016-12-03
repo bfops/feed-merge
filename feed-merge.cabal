@@ -1,26 +1,24 @@
-name:               rss-refeeder
+name:               feed-merge
 version:            0.0.0
 synopsis:           Combine RSS feeds into a more easily-digestible feed.
 description:        Combine RSS feeds into a more easily-digestible feed.
 category:           Network
 license:            BSD3
 author:             Zeke Foppa
-homepage:           https://github.com/bfops/rss-refeeder
+homepage:           https://github.com/bfops/feed-merge
 maintainer:         benjamin.foppa@gmail.com
 build-type:         Simple
 cabal-version:      >= 1.9.2
 
-executable rss-refeeder
+library 
     hs-source-dirs:   src
+    exposed-modules:  Text.Feed.Merge
     ghc-options:      -Wall -Werror -fno-warn-name-shadowing
-    main-is:          Main.hs
     build-depends:    base == 4.*
-                    , curl
                     , feed
                     , time
                     , time-locale-compat
-                    , xml
 
 source-repository head
   type: git
-  location: https://github.com/bfops/rss-refeeder
+  location: https://github.com/bfops/feed-merge

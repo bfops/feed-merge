@@ -1,4 +1,6 @@
 {-# LANGUAGE TupleSections #-}
+module Text.Feed.Merge ( merge_feeds ) where
+
 import Control.Monad
 import Data.Function
 import Data.Functor.Identity
@@ -7,38 +9,14 @@ import Data.Maybe
 import Data.Time.Locale.Compat
 import Data.Time.Format (parseTimeM)
 import Data.Time.Clock
-import Network.Curl
-import System.Environment
 import System.IO
 import Text.Feed.Constructor
-import Text.Feed.Export
-import Text.Feed.Import
 import Text.Feed.Query
 import Text.Feed.Types
-import Text.XML.Light.Output
 
 infixl 1 |>
 (|>) :: a -> (a -> b) -> b
 (|>) x f = f x
-
-feeds :: String -> IO [String]
-feeds file = read <$> readFile file
-
-fetch_url :: String -> IO String
-fetch_url url = do
-  (_code, response) <- curlGetString url [CurlFollowLocation True]
-  return response
-
-get_feed :: String -> IO [(Feed, Item)]
-get_feed url = do
-  hPutStrLn stderr ("Getting " ++ url)
-  feed <- fetch_url url
-  case parseFeedString feed of
-    Nothing -> do
-      hPutStrLn stderr ("Error parsing " ++ url)
-      return []
-    Just feed -> do
-      return ((feed,) <$> feedItems feed)
 
 sortByCompareM :: (Ord b, Monad m) => (a -> m b) -> [a] -> m [a]
 sortByCompareM comparable l = do
@@ -79,11 +57,9 @@ merge feeds = do
             ]
       return $ foldl mplus Nothing (map (\fmt -> parseTimeM True defaultTimeLocale fmt s) formats)
 
-merged_feed_items :: String -> IO [(Feed, Item)]
-merged_feed_items feeds_file = do
-  feeds <- feeds feeds_file
-  feeds <- mapM get_feed feeds
-  hPutStrLn stderr "Finished fetching"
+merge_feeds_items :: [Feed] -> IO [(Feed, Item)]
+merge_feeds_items feeds = do
+  feeds <- return $ map (\feed -> (feed,) <$> feedItems feed) feeds
   merged <- merge feeds
   return merged
 
@@ -112,9 +88,9 @@ normalize_item item =
   |> (withItemAuthor <$> getItemAuthor item <?> id)
   |> (withItemDescription <$> getItemDescription item <?> id)
 
-merged_feed :: String -> IO Feed
-merged_feed feeds_file = do
-  items <- merged_feed_items feeds_file
+merge_feeds :: [Feed] -> IO Feed
+merge_feeds feeds = do
+  items <- merge_feeds_items feeds
   items <- return $
     items
     |> map (\(feed, item) -> amend_item_author feed item)
@@ -122,17 +98,6 @@ merged_feed feeds_file = do
   feed <- return $
     newFeed (RSSKind Nothing)
     |> withFeedTitle "Merged feed"
+    |> withFeedDescription "A merged RSS feed"
     |> withFeedItems items
   return feed
-
-main :: IO ()
-main = do
-  args <- getArgs
-  case args of
-    [feeds_file] -> do
-      feed <- merged_feed feeds_file
-      putStrLn (ppElement (xmlFeed feed))
-      return ()
-    _ -> do
-      hPutStrLn stderr "Unexpected arguments"
-      return ()
