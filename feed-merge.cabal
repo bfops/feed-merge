@@ -19,6 +19,16 @@ library
                     , time
                     , time-locale-compat
 
+executable print-merged
+    hs-source-dirs:   .
+    main-is: examples/print-merged.hs
+    ghc-options: -Wall -Werror -fno-warn-name-shadowing
+    build-depends: base == 4.*
+                 , curl
+                 , feed
+                 , feed-merge
+                 , xml
+
 source-repository head
   type: git
   location: https://github.com/bfops/feed-merge
